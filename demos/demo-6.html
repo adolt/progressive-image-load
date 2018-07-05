@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>必应今日</title>
+</head>
+
+<style>
+  body {
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+  }
+
+  figure {
+    position: relative;
+    padding-bottom: 203px;
+    margin: 0;
+    width: 360px;
+  }
+
+  img {
+    position: absolute;
+    width: 100%;
+    opacity: 0;
+    transition: opacity 1s linear;
+  }
+
+  img.loaded {
+    opacity: 1;
+  }
+
+  img.hidden {
+    opacity: 0;
+  }
+
+  .placeholder {
+    position: absolute;
+    width: 100%;
+    height: 203px;
+  }
+
+  .placeholder img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    filter: blur(10px);
+  }
+</style>
+
+<script>
+  function progressivelyLoad(figure) {
+    const placeholder = figure.querySelector('.placeholder')
+
+    // 加载小图
+    const smallImg = new Image();
+
+    smallImg.src = placeholder.dataset.small
+    smallImg.onload = () => {
+      smallImg.classList.add('loaded')
+    }
+    placeholder.appendChild(smallImg)
+
+    // 加载大图
+    const bigImg = new Image();
+
+    bigImg.src = placeholder.dataset.large
+    bigImg.onload = () => {
+      bigImg.classList.add('loaded')
+
+      // 大图加载完后隐藏小图
+      setTimeout(() => {
+        smallImg.classList.add('hidden')
+      }, 500);
+    }
+    figure.appendChild(bigImg)
+  }
+
+  function observeIntersection(figures, callback) {
+    let active = false
+
+    const lazyLoad = () => {
+      if (active) return
+
+      active = true
+
+      setTimeout(() => {
+        figures.forEach(figure => {
+          if (figure.getBoundingClientRect().top <= window.innerHeight
+            && figure.getBoundingClientRect().bottom >= 0) {
+
+            // 元素进入视口了 
+            callback(figure)
+
+            figures = figures.filter(f => f !== figure);
+
+            if (figures.length === 0) {
+              document.removeEventListener("scroll", lazyLoad);
+            }
+          }
+        })
+        active = false
+      }, 200);
+    }
+
+    document.addEventListener('scroll', lazyLoad)
+
+    lazyLoad()
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const figures = [].slice.call(document.querySelectorAll('.lazy'))
+
+    if ("IntersectionObserver" in window) {
+      const figureObserver = new IntersectionObserver((entries, observer) => {
+
+        entries.forEach((entry) => {
+          // 元素进入视口了
+          if (entry.isIntersecting) {
+            const figure = entry.target;
+
+            progressivelyLoad(figure)
+
+            figureObserver.unobserve(figure);
+          }
+        });
+      });
+
+      figures.forEach(figure => figureObserver.observe(figure));
+    } else {
+      observeIntersection(figures, figure => progressivelyLoad(figure))
+    }
+  })
+</script>
+
+<body>
+  <figure class="lazy">
+    <p>2018-7-4</p>
+    <div class="placeholder" data-small="https://fe.imdada.cn/static/images/1.png" data-large="https://cn.bing.com/az/hprichbg/rb/ButtermereLake_ZH-CN8185859566_1920x1080.jpg">
+      <!-- <img src="https://fe.imdada.cn/static/images/1.png" /> -->
+    </div>
+    <!-- <img src="https://cn.bing.com/az/hprichbg/rb/ButtermereLake_ZH-CN8185859566_1920x1080.jpg" /> -->
+  </figure>
+  <figure class="lazy">
+    <p>2018-7-3</p>
+    <div class="placeholder" data-small="https://fe.imdada.cn/static/images/2.png" data-large="https://cn.bing.com/az/hprichbg/rb/TurtleIndianOcean_ZH-CN9256087399_1920x1080.jpg">
+      <!-- <img src="https://fe.imdada.cn/static/images/2.png" /> -->
+    </div>
+    <!-- <img src="https://cn.bing.com/az/hprichbg/rb/TurtleIndianOcean_ZH-CN9256087399_1920x1080.jpg" /> -->
+  </figure>
+  <figure class="lazy">
+    <p>2018-7-2</p>
+    <div class="placeholder" data-small="https://fe.imdada.cn/static/images/3.png" data-large="https://cn.bing.com/az/hprichbg/rb/EtaAquarids_ZH-CN10323549621_1920x1080.jpg">
+      <!-- <img src="https://fe.imdada.cn/static/images/3.png" /> -->
+    </div>
+    <!-- <img src="https://cn.bing.com/az/hprichbg/rb/EtaAquarids_ZH-CN10323549621_1920x1080.jpg" /> -->
+  </figure>
+  <figure class="lazy">
+    <p>2018-7-1</p>
+    <div class="placeholder" data-small="https://fe.imdada.cn/static/images/4.png" data-large="https://cn.bing.com/az/hprichbg/rb/MeteorCrater_ZH-CN10237243221_1920x1080.jpg">
+      <!-- <img src="https://fe.imdada.cn/static/images/4.png" /> -->
+    </div>
+    <!-- <img src="https://cn.bing.com/az/hprichbg/rb/MeteorCrater_ZH-CN10237243221_1920x1080.jpg" /> -->
+  </figure>
+  <figure class="lazy">
+    <p>2018-6-30</p>
+    <div class="placeholder" data-small="https://fe.imdada.cn/static/images/5.png" data-large="https://cn.bing.com/az/hprichbg/rb/AuroraPhotographer_ZH-CN11480495787_1920x1080.jpg">
+      <!-- <img src="https://fe.imdada.cn/static/images/5.png" /> -->
+    </div>
+    <!-- <img src="https://cn.bing.com/az/hprichbg/rb/AuroraPhotographer_ZH-CN11480495787_1920x1080.jpg" /> -->
+  </figure>
+  <figure class="lazy">
+    <p>2018-6-29</p>
+    <div class="placeholder" data-small="https://fe.imdada.cn/static/images/6.png" data-large="https://cn.bing.com/az/hprichbg/rb/CompositeBeach_ZH-CN9646269492_1920x1080.jpg">
+      <!-- <img src="https://fe.imdada.cn/static/images/6.png" /> -->
+    </div>
+    <!-- <img src="https://cn.bing.com/az/hprichbg/rb/CompositeBeach_ZH-CN9646269492_1920x1080.jpg" /> -->
+  </figure>
+  <figure class="lazy">
+    <p>2018-6-28</p>
+    <div class="placeholder" data-small="https://fe.imdada.cn/static/images/7.png" data-large="https://cn.bing.com/az/hprichbg/rb/ConcreteDinosaurs_ZH-CN9038296644_1920x1080.jpg">
+      <!-- <img src="https://fe.imdada.cn/static/images/7.png" /> -->
+    </div>
+    <!-- <img src="https://cn.bing.com/az/hprichbg/rb/ConcreteDinosaurs_ZH-CN9038296644_1920x1080.jpg" /> -->
+  </figure>
+</body>
+
+</html>
